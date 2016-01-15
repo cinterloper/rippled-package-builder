@@ -14,13 +14,9 @@ RUN cd /usr/src && \
     make all && \
     make install
 
-# Install gcc 5.2
-RUN svn co svn://gcc.gnu.org/svn/gcc/tags/gcc_5_2_0_release gcc && \
-    cd gcc && \
-    ./contrib/download_prerequisites && \
-    ./configure --prefix=/usr --disable-multilib --enable-languages=c,c++ && \
-    make -j `nproc` && \
-    make install
+# Install GCC 5
+COPY Fedora-Core23.repo /etc/yum.repos.d/
+RUN yum install -y gcc gcc-c++ libstdc++-static --enablerepo=warning:fedora
 
 # Use Fedora EPEL for protobuf-static
 RUN wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
@@ -43,13 +39,8 @@ RUN ln -s -f /opt/ripple/openssl/lib/openssl /lib64/openssl
 RUN ln -s -f /opt/ripple/openssl/lib/pkgconfig/* /lib64/pkgconfig/
 RUN ldconfig
 
-RUN curl -O https://bootstrap.pypa.io/get-pip.py
-RUN python get-pip.py
-RUN pip install awscli
-
 RUN git clone https://github.com/ripple/rippled.git
 
-COPY run_script.sh ./
 COPY build_rpm.sh ./
 COPY rippled.spec ./
 COPY rippled.service /root/rpmbuild/SOURCES/
@@ -60,4 +51,4 @@ COPY wrapper.sh /root/rpmbuild/SOURCES/
 COPY public-keys.txt ./
 RUN gpg --import public-keys.txt
 
-CMD ./run_script.sh
+CMD ./build_rpm.sh

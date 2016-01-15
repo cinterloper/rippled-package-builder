@@ -15,7 +15,6 @@ Source2:        50-rippled.preset
 Source3:        wrapper.sh
 
 BuildRequires:  scons ripple-boost-devel protobuf-devel ripple-openssl-devel
-Requires:       ripple-openssl-libs
 
 %description
 rippled
@@ -24,7 +23,7 @@ rippled
 %setup -n rippled
 
 %build
-if [ "$RIPPLED_RPM_VERSION" == "0.30.0" ]; then
+if [[ $RIPPLED_RPM_VERSION == "0.30.0"* ]]; then
   RIPPLED_OLD_GCC_ABI=1 scons %{?_smp_mflags}
 else
   RIPPLED_OLD_GCC_ABI=0 scons %{?_smp_mflags} --static
@@ -35,6 +34,8 @@ rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT%{_prefix}/
 echo "Installing to /opt/ripple/"
 install -D doc/rippled-example.cfg ${RPM_BUILD_ROOT}%{_prefix}/etc/rippled.cfg
+install -d ${RPM_BUILD_ROOT}/etc/opt/ripple
+ln -s %{_prefix}/etc/rippled.cfg ${RPM_BUILD_ROOT}/etc/opt/ripple/rippled.cfg
 install -D build/gcc.release/rippled ${RPM_BUILD_ROOT}%{_bindir}/rippled
 install -D %{SOURCE1} ${RPM_BUILD_ROOT}/usr/lib/systemd/system/rippled.service
 install -D %{SOURCE2} ${RPM_BUILD_ROOT}/usr/lib/systemd/system-preset/50-rippled.preset
@@ -62,8 +63,9 @@ chmod 755 /var/lib/rippled/
 %{_bindir}/rippled
 %{_bindir}/wrapper.sh
 %config(noreplace) %{_prefix}/etc/rippled.cfg
-/usr/lib/systemd/system/rippled.service
-/usr/lib/systemd/system-preset/50-rippled.preset
+%config(noreplace) /etc/opt/ripple/rippled.cfg
+%config(noreplace) /usr/lib/systemd/system/rippled.service
+%config(noreplace) /usr/lib/systemd/system-preset/50-rippled.preset
 %dir /var/log/rippled/
 %dir /var/lib/rippled/
 
