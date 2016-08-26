@@ -7,7 +7,7 @@ function error {
 
 yum install -y make gcc-c++
 curl --silent --location https://rpm.nodesource.com/setup | bash -
-yum install -y yum-utils nodejs
+yum install -y yum-utils nodejs tar util-linux-ng
 
 # Check rpm's md5sum
 mkdir rpms
